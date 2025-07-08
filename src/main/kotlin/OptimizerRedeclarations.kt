@@ -7,8 +7,8 @@ import com.microsoft.z3.Expr
 import com.microsoft.z3.Optimize
 import com.microsoft.z3.Sort
 
-public inline fun Optimize.add(vararg constraints: Expr<BoolSort>): Unit = Add(*assertions)
-public inline fun Optimize.assert(vararg constraints: Expr<BoolSort>): Unit = Assert(*assertions)
+public inline fun Optimize.add(vararg constraints: Expr<BoolSort>): Unit = Add(*constraints)
+public inline fun Optimize.assert(vararg constraints: Expr<BoolSort>): Unit = Assert(*constraints)
 public inline fun Optimize.assertAndTrack(constraint: Expr<BoolSort>, p: Expr<BoolSort>): Unit = AssertAndTrack(constraint, p)
 public inline fun Optimize.assertSoft(constraint: Expr<BoolSort>, weight: Int, group: String): Optimize.Handle<*> = AssertSoft(constraint, weight, group)
 public inline fun Optimize.assertSoft(constraint: Expr<BoolSort>, weight: String, group: String): Optimize.Handle<*> = AssertSoft(constraint, weight, group)
