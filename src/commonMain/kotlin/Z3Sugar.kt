@@ -2,7 +2,10 @@
 
 package com.sschr15.z3kt
 
-import com.microsoft.z3.*
+import kotlin.jvm.JvmName
+
+public val <S : Sort> Expr<S>.sort: S get() = getSort()
+public val BitVecSort.size: Int get() = getSize()
 
 //region: Comparisons
 context(context: Context) public infix fun <T : Sort> Expr<T>.eq(other: Expr<T>): BoolExpr = context.mkEq(this, other)
@@ -260,8 +263,8 @@ context(context: Context) public infix fun Long.mod(other: Expr<BitVecSort>): Bi
 public class IfThen<T : Sort> internal constructor(internal val condition: BoolExpr, internal val then: Expr<T>)
 public infix fun <T : Sort> BoolExpr.ifTrue(then: Expr<T>): IfThen<T> = IfThen(this, then)
 context(context: Context) public infix fun <T : Sort> IfThen<T>.ifFalse(otherwise: Expr<T>): Expr<T> = context.mkITE(condition, then, otherwise)
-@JvmName("ternaryIf") public infix fun <T : Sort> BoolExpr.`?`(then: Expr<T>): IfThen<T> = ifTrue(then)
-@JvmName("ternaryElse") @Suppress("INVALID_CHARACTERS") context(context: Context) public infix fun <T : Sort> IfThen<T>.`:`(otherwise: Expr<T>): Expr<T> = ifFalse(otherwise)
+//@JvmName("ternaryIf") public infix fun <T : Sort> BoolExpr.`?`(then: Expr<T>): IfThen<T> = ifTrue(then)
+//@JvmName("ternaryElse") @Suppress("INVALID_CHARACTERS") context(context: Context) public infix fun <T : Sort> IfThen<T>.`:`(otherwise: Expr<T>): Expr<T> = ifFalse(otherwise)
 context(context: Context) public fun Expr<IntSort>.abs(): Expr<IntSort> = context.mkITE(this gte 0, this, -this)
 context(context: Context) public fun Expr<IntSort>.sign(): Expr<IntSort> = context.mkITE(this eq 0, 0.toZ3Int(), context.mkITE(this gte 0, 1.toZ3Int(), (-1).toZ3Int()))
 @JvmName("absReal") context(context: Context) public fun Expr<RealSort>.abs(): Expr<RealSort> = context.mkITE(this gte 0, this, this * context.mkReal(-1))

@@ -1,6 +1,5 @@
 package com.sschr15.z3kt
 
-import com.microsoft.z3.*
 import kotlin.properties.PropertyDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty

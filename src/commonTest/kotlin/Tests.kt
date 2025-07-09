@@ -1,7 +1,10 @@
+package com.sschr15.z3kt.test
+
 import com.sschr15.z3kt.*
 import kotlin.math.absoluteValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class Tests {
@@ -12,11 +15,12 @@ class Tests {
             val b by int
             val c by int
 
-            val model = solve { 
+            val model = solve {
                 add(a   + 2*b - c eq 4)
                 add(a   +   b + c eq 3)
                 add(2*a +   b + c eq 5)
             }
+
             assertNotNull(model, "Model was deemed unsatisfiable")
 
             Triple(model[a].toInt(), model[b].toInt(), model[c].toInt())
@@ -67,6 +71,21 @@ class Tests {
 
             assertEquals(14, model[x].toInt())
             assertEquals(11, model[y].toInt())
+        }
+    }
+
+    @Test
+    fun `test error handling`() {
+        assertFailsWith<Z3Exception> {
+            z3 {
+                val myInconspicuousSymbol = mkSymbol(-1)
+            }
+        }
+
+        assertFailsWith<Z3Exception> {
+            z3 {
+                val definitelyNotNaN = mkReal(0, 0)
+            }
         }
     }
 }

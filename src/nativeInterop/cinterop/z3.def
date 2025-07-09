@@ -1,0 +1,4 @@
+package = lib.z3
+headers = z3.h
+headerFilter = z3*.h
+linkerOpts = -L/usr/lib -lz3
