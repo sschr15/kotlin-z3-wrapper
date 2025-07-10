@@ -47,22 +47,14 @@ kotlin {
         mingwX64()
     ).forEach { target ->
         val z3Dir = layout.buildDirectory.dir("z3/${target.targetName}").get().asFile
- 
-        target.compilations.getByName("main") {
-            cinterops {
-                val z3 by creating {
-                    defFile("src/nativeInterop/cinterop/z3.def")
-                    includeDirs.allHeaders(z3Dir.resolve("include"))
-                    compilerOpts("-I${z3Dir.resolve("include").absolutePath}")
-                }
-            }
-        }
 
-        target.binaries.all {
-            linkerOpts("-L${z3Dir.resolve("bin").absolutePath}", "-lz3")
-        }
+        val genData = tasks.register<ProcessResources>("${target.targetName}Defs") {
+            outputs.upToDateWhen { false }
 
-        tasks.getByName("cinteropZ3${target.targetName.replaceFirstChar { c -> c.uppercase() }}") {
+            from(files("src/nativeInterop/cinterop/z3.def"))
+            into(z3Dir.resolve("lib"))
+            expand("cinteropLibs" to z3Dir.resolve("bin").absolutePath)
+
             doFirst {
                 val downloadUrl = z3Downloads[target.targetName] ?: error("No download URL found for target ${target.targetName}")
                 val z3Zip = layout.buildDirectory.file("z3/${target.targetName}.zip").get().asFile
@@ -83,7 +75,7 @@ kotlin {
                         throw RuntimeException("Failed to verify Z3 checksum.")
                     }
                 }
-                if (!z3Dir.exists()) {
+                if (!z3Dir.exists() || !z3Dir.resolve("bin").exists() || !z3Dir.resolve("include").exists()) {
                     println("Extracting Z3")
                     copy {
                         from(zipTree(z3Zip)) {
@@ -109,6 +101,20 @@ kotlin {
                     println("Finished building Z3 for target ${target.targetName}")
                 }
             }
+        }
+ 
+        target.compilations.getByName("main") {
+            cinterops {
+                val z3 by creating {
+                    defFile(genData.get().outputs.files.singleFile.resolve("z3.def"))
+                    includeDirs.allHeaders(z3Dir.resolve("include"))
+                    compilerOpts("-I${z3Dir.resolve("include").absolutePath}")
+                }
+            }
+        }
+
+        tasks.getByName("cinteropZ3${target.targetName.replaceFirstChar { c -> c.uppercase() }}") {
+            dependsOn(genData)
         }
     }
 
