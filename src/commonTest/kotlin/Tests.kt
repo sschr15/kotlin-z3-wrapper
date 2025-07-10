@@ -88,4 +88,22 @@ class Tests {
             }
         }
     }
+
+    @Test
+    fun `test java library format`() {
+        val context = Context()
+        val x = context.mkIntConst("x")
+        val sixXPlusThree = context.mkAdd(context.mkMul(context.mkInt(6), x), context.mkInt(3))
+        val sixXPlusThreeString = sixXPlusThree.toString()
+        assertEquals("(+ (* 6 x) 3)", sixXPlusThreeString)
+
+        val solver = context.mkSolver()
+        solver.add(context.mkEq(sixXPlusThree, context.mkInt(21)))
+        val status = solver.check()
+        assertEquals(Status.SATISFIABLE, status)
+
+        val model = solver.getModel()!!
+        val xValue = model.eval(x, true)
+        assertEquals(3, xValue.toInt())
+    }
 }
