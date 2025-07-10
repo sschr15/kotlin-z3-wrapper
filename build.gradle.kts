@@ -6,10 +6,11 @@ import java.security.MessageDigest
 
 plugins {
     kotlin("multiplatform") version "2.2.0"
+    `maven-publish`
 }
 
-group = "com.sschr15"
-version = "0.4.0"
+group = "com.sschr15.z3kt"
+version = "0.5.0"
 
 repositories {
     mavenCentral()
@@ -36,7 +37,7 @@ kotlin {
     explicitApi()
 
     jvm()
-    jvmToolchain(17)
+    jvmToolchain(8)
 
     listOf(
         linuxX64(),
@@ -133,5 +134,11 @@ kotlin {
                 implementation(files("com.microsoft.z3.jar"))
             }
         }
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
     }
 }
