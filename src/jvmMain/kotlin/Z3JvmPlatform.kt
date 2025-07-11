@@ -5,7 +5,6 @@ public actual typealias Z3Object = com.microsoft.z3.Z3Object
 public actual typealias Z3Exception = com.microsoft.z3.Z3Exception
 
 public actual typealias AST = com.microsoft.z3.AST
-public actual typealias ASTVector = com.microsoft.z3.ASTVector
 
 public actual typealias Symbol = com.microsoft.z3.Symbol
 public actual typealias IntSymbol = com.microsoft.z3.IntSymbol

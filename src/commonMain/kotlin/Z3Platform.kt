@@ -679,8 +679,6 @@ public expect abstract class Z3Object
 
 public expect open class Z3Exception : Exception
 
-public expect class ASTVector : Z3Object
-
 public expect open class Symbol : Z3Object
 public expect class IntSymbol : Symbol
 public expect class StringSymbol : Symbol

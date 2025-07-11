@@ -24,7 +24,8 @@ internal fun Sort(native: Z3_sort, context: Context): Sort = when (Z3_get_sort_k
 }
 
 public actual open class Sort(context: Context, internal val native: Z3_sort) : AST(context, Z3_sort_to_ast(context.native, native)!!) {
-    public actual override fun translate(otherContext: Context): Sort = super.translate(otherContext) as Sort
+    actual override fun translate(otherContext: Context): Sort = super.translate(otherContext) as Sort
+    override fun toString(): String = Z3_sort_to_string(context.native, native)!!.toKString()
 }
 
 public actual open class ArithSort(native: Z3_sort, context: Context) : Sort(context, native)

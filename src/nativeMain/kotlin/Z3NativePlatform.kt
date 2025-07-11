@@ -10,23 +10,17 @@ internal actual fun initialize() {
 
 public actual open class Z3Exception(message: String) : Exception(message)
 
-public actual abstract class Z3Object {
-    public override fun toString(): String {
-        throw NotImplementedError("toString needs to be overridden!")
-    }
-}
+public actual abstract class Z3Object(internal val context: Context)
 
-public actual open class Symbol(internal val native: Z3_symbol, internal val context: Context) : Z3Object() {
-    public override fun toString(): String = Z3_get_symbol_string(context.native, native)!!.toKString()
+public actual open class Symbol(internal val native: Z3_symbol, context: Context) : Z3Object(context) {
+    override fun toString(): String = Z3_get_symbol_string(context.native, native)!!.toKString()
 }
 
 public actual class IntSymbol(native: Z3_symbol, context: Context) : Symbol(native, context)
 public actual class StringSymbol(native: Z3_symbol, context: Context) : Symbol(native, context)
 
-public actual class Constructor<R>(internal val native: Z3_constructor) : Z3Object()
-public actual class ConstructorList<R>(internal val native: Z3_constructor_list) : Z3Object()
-
-public actual class ASTVector(internal val native: MutableList<Z3_ast>) : Z3Object()
+public actual class Constructor<R>(internal val native: Z3_constructor, context: Context) : Z3Object(context)
+public actual class ConstructorList<R>(internal val native: Z3_constructor_list, context: Context) : Z3Object(context)
 
 context(ctx: Context) internal fun <S : Sort> Expr(native: Z3_ast): Expr<S> = Expr(native, ctx)
 
@@ -72,22 +66,34 @@ context(ctx: Context) internal fun FPRMNum(native: Z3_ast): FPRMNum = FPRMNum(na
 context(ctx: Context) internal fun <R : Sort> Lambda(native: Z3_ast): Lambda<R> = Lambda(native, ctx)
 context(ctx: Context) internal fun Quantifier(native: Z3_ast): Quantifier = Quantifier(native, ctx)
 
-public actual class FuncDecl<R : Sort>(internal val native: Z3_func_decl, context: Context) : AST(context, Z3_func_decl_to_ast(context.native, native)!!)
-public actual class Pattern(internal val native: Z3_pattern) : Z3Object()
-public actual class Tactic(internal val native: Z3_tactic) : Z3Object()
-public actual class Probe(internal val native: Z3_probe) : Z3Object()
-public actual class Goal(internal val native: Z3_goal) : Z3Object()
-public actual class ApplyResult(internal val native: Z3_apply_result) : Z3Object()
-public actual class Params(internal val native: Z3_params) : Z3Object()
-public actual class ParamDescriptions(internal val native: Z3_param_descrs) : Z3Object()
-public actual class Simplifier(internal val native: Z3_simplifier) : Z3Object()
-public actual class Fixedpoint(internal val native: Z3_fixedpoint) : Z3Object()
-
-public actual class FuncInterp<R : Sort>(internal val native: Z3_func_interp) : Z3Object() {
-    public actual class Entry<R : Sort>(internal val native: Z3_func_entry) : Z3Object()
+public actual class ApplyResult(internal val native: Z3_apply_result, context: Context) : Z3Object(context) {
+    override fun toString(): String = Z3_apply_result_to_string(context.native, native)!!.toKString()
 }
 
-public actual typealias AstPrintMode = lib.z3.Z3_ast_print_mode
+public actual class FuncDecl<R : Sort>(internal val native: Z3_func_decl, context: Context) : AST(context, Z3_func_decl_to_ast(context.native, native)!!) {
+    override fun toString(): String = Z3_func_decl_to_string(context.native, native)!!.toKString()
+}
+
+public actual class Pattern(internal val native: Z3_pattern, context: Context) : Z3Object(context) {
+    override fun toString(): String = Z3_pattern_to_string(context.native, native)!!.toKString()
+}
+
+public actual class Goal(internal val native: Z3_goal, context: Context) : Z3Object(context) {
+    override fun toString(): String = Z3_goal_to_string(context.native, native)!!.toKString()
+}
+
+public actual class Tactic(internal val native: Z3_tactic, context: Context) : Z3Object(context)
+public actual class Probe(internal val native: Z3_probe, context: Context) : Z3Object(context)
+public actual class Params(internal val native: Z3_params, context: Context) : Z3Object(context)
+public actual class ParamDescriptions(internal val native: Z3_param_descrs, context: Context) : Z3Object(context)
+public actual class Simplifier(internal val native: Z3_simplifier, context: Context) : Z3Object(context)
+public actual class Fixedpoint(internal val native: Z3_fixedpoint, context: Context) : Z3Object(context)
+
+public actual class FuncInterp<R : Sort>(internal val native: Z3_func_interp, context: Context) : Z3Object(context) {
+    public actual class Entry<R : Sort>(internal val native: Z3_func_entry, context: Context) : Z3Object(context)
+}
+
+public actual typealias AstPrintMode = Z3_ast_print_mode
 
 context(ctx: Context) internal fun <R : Sort> FuncDecl(native: Z3_func_decl): FuncDecl<R> = FuncDecl(native, ctx)
 

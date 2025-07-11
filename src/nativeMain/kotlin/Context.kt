@@ -97,7 +97,7 @@ public actual class Context public actual constructor(config: Map<String, String
     ): Constructor<R> {
         check(sorts.size == fieldNames.size) { "sorts.size != fieldNames.size" }
         check(sortRefs.size == sorts.size) { "sortRefs.size != sorts.size" }
-        return Constructor(Z3_mk_constructor(context, name.native, recognizer.native, sorts.size.toUInt(), fieldNames.native, sorts.native, sortRefs.toUIntArray().toCValues())!!)
+        return Constructor(Z3_mk_constructor(context, name.native, recognizer.native, sorts.size.toUInt(), fieldNames.native, sorts.native, sortRefs.toUIntArray().toCValues())!!, this)
     }
 
     public actual fun <R> mkConstructor(name: String, recognizer: String, fieldNames: Array<String>, sorts: Array<Sort>, sortRefs: IntArray): Constructor<R> =
@@ -165,7 +165,7 @@ public actual class Context public actual constructor(config: Map<String, String
             sort.native,
         )!!,
     )
-    public actual fun mkPattern(vararg terms: Expr<*>): Pattern = Pattern(Z3_mk_pattern(context, terms.size.toUInt(), terms.native)!!)
+    public actual fun mkPattern(vararg terms: Expr<*>): Pattern = Pattern(Z3_mk_pattern(context, terms.size.toUInt(), terms.native)!!, this)
     public actual fun <R : Sort> mkConst(s: Symbol, sort: R): Expr<R> = Expr(Z3_mk_const(context, s.native, sort.native)!!)
     public actual fun <R : Sort> mkConst(name: String, sort: R): Expr<R> = mkConst(mkSymbol(name), sort)
     public actual fun <R : Sort> mkConst(decl: FuncDecl<R>): Expr<R> = mkApp(decl)
@@ -633,37 +633,37 @@ public actual class Context public actual constructor(config: Map<String, String
         return Array(Z3_ast_vector_size(context, vector).toInt()) { BoolExpr(Z3_ast_vector_get(context, vector, it.toUInt())!!) }
     }
 
-    public actual fun mkGoal(preciseSubgoals: Boolean, models: Boolean, unsatCores: Boolean): Goal = Goal(Z3_mk_goal(context, preciseSubgoals, models, unsatCores)!!)
-    public actual fun mkParams(): Params = Params(Z3_mk_params(context)!!)
+    public actual fun mkGoal(preciseSubgoals: Boolean, models: Boolean, unsatCores: Boolean): Goal = Goal(Z3_mk_goal(context, preciseSubgoals, models, unsatCores)!!, this)
+    public actual fun mkParams(): Params = Params(Z3_mk_params(context)!!, this)
     public actual fun getNumTactics(): Int = Z3_get_num_tactics(context).toInt()
     public actual fun getTacticNames(): Array<String> = Array(getNumTactics()) { Z3_get_tactic_name(context, it.toUInt())?.toKString() ?: "" }
     public actual fun getTacticDescription(name: String): String = Z3_tactic_get_descr(context, name)?.toKString() ?: ""
-    public actual fun mkTactic(name: String): Tactic = Tactic(Z3_mk_tactic(context, name)!!)
+    public actual fun mkTactic(name: String): Tactic = Tactic(Z3_mk_tactic(context, name)!!, this)
     public actual fun andThen(t1: Tactic, t2: Tactic, vararg rest: Tactic): Tactic = rest
         .fold(Z3_tactic_and_then(context, t1.native, t2.native)) { prev, current -> Z3_tactic_and_then(context, prev, current.native) }
-        .let { Tactic(it!!) }
+        .let { Tactic(it!!, this) }
 
     public actual fun andThen(s1: Simplifier, s2: Simplifier, vararg rest: Simplifier): Simplifier = rest
         .fold(Z3_simplifier_and_then(context, s1.native, s2.native)) { prev, current -> Z3_simplifier_and_then(context, prev, current.native) }
-        .let { Simplifier(it!!) }
+        .let { Simplifier(it!!, this) }
 
     public actual fun then(t1: Tactic, t2: Tactic, vararg rest: Tactic): Tactic = andThen(t1, t2, *rest)
     public actual fun then(s1: Simplifier, s2: Simplifier, vararg rest: Simplifier): Simplifier = andThen(s1, s2, *rest)
-    public actual fun orElse(t1: Tactic, t2: Tactic): Tactic = Tactic(Z3_tactic_or_else(context, t1.native, t2.native)!!)
-    public actual fun tryFor(t: Tactic, milliseconds: Int): Tactic = Tactic(Z3_tactic_try_for(context, t.native, milliseconds.toUInt())!!)
-    public actual fun `when`(p: Probe, t: Tactic): Tactic = Tactic(Z3_tactic_when(context, p.native, t.native)!!)
-    public actual fun cond(p: Probe, thenTactic: Tactic, elseTactic: Tactic): Tactic = Tactic(Z3_tactic_cond(context, p.native, thenTactic.native, elseTactic.native)!!)
-    public actual fun repeat(t: Tactic, max: Int): Tactic = Tactic(Z3_tactic_repeat(context, t.native, max.toUInt())!!)
-    public actual fun skip(): Tactic = Tactic(Z3_tactic_skip(context)!!)
-    public actual fun fail(): Tactic = Tactic(Z3_tactic_fail(context)!!)
-    public actual fun failIf(p: Probe): Tactic = Tactic(Z3_tactic_fail_if(context, p.native)!!)
-    public actual fun failIfNotDecided(): Tactic = Tactic(Z3_tactic_fail_if_not_decided(context)!!)
-    public actual fun usingParams(t: Tactic, p: Params): Tactic = Tactic(Z3_tactic_using_params(context, t.native, p.native)!!)
-    public actual fun usingParams(s: Simplifier, p: Params): Simplifier = Simplifier(Z3_simplifier_using_params(context, s.native, p.native)!!)
+    public actual fun orElse(t1: Tactic, t2: Tactic): Tactic = Tactic(Z3_tactic_or_else(context, t1.native, t2.native)!!, this)
+    public actual fun tryFor(t: Tactic, milliseconds: Int): Tactic = Tactic(Z3_tactic_try_for(context, t.native, milliseconds.toUInt())!!, this)
+    public actual fun `when`(p: Probe, t: Tactic): Tactic = Tactic(Z3_tactic_when(context, p.native, t.native)!!, this)
+    public actual fun cond(p: Probe, thenTactic: Tactic, elseTactic: Tactic): Tactic = Tactic(Z3_tactic_cond(context, p.native, thenTactic.native, elseTactic.native)!!, this)
+    public actual fun repeat(t: Tactic, max: Int): Tactic = Tactic(Z3_tactic_repeat(context, t.native, max.toUInt())!!, this)
+    public actual fun skip(): Tactic = Tactic(Z3_tactic_skip(context)!!, this)
+    public actual fun fail(): Tactic = Tactic(Z3_tactic_fail(context)!!, this)
+    public actual fun failIf(p: Probe): Tactic = Tactic(Z3_tactic_fail_if(context, p.native)!!, this)
+    public actual fun failIfNotDecided(): Tactic = Tactic(Z3_tactic_fail_if_not_decided(context)!!, this)
+    public actual fun usingParams(t: Tactic, p: Params): Tactic = Tactic(Z3_tactic_using_params(context, t.native, p.native)!!, this)
+    public actual fun usingParams(s: Simplifier, p: Params): Simplifier = Simplifier(Z3_simplifier_using_params(context, s.native, p.native)!!, this)
     public actual fun with(t: Tactic, p: Params): Tactic = usingParams(t, p)
     public actual fun with(s: Simplifier, p: Params): Simplifier = usingParams(s, p)
-    public actual fun parOr(vararg tactics: Tactic): Tactic = Tactic(Z3_tactic_par_or(context, tactics.size.toUInt(), tactics.native)!!)
-    public actual fun parAndThen(t1: Tactic, t2: Tactic): Tactic = Tactic(Z3_tactic_par_and_then(context, t1.native, t2.native)!!)
+    public actual fun parOr(vararg tactics: Tactic): Tactic = Tactic(Z3_tactic_par_or(context, tactics.size.toUInt(), tactics.native)!!, this)
+    public actual fun parAndThen(t1: Tactic, t2: Tactic): Tactic = Tactic(Z3_tactic_par_and_then(context, t1.native, t2.native)!!, this)
 
     public actual fun interrupt() {
         Z3_interrupt(context)
@@ -672,27 +672,27 @@ public actual class Context public actual constructor(config: Map<String, String
     public actual fun getNumSimplifiers(): Int = Z3_get_num_simplifiers(context).toInt()
     public actual fun getSimplifierNames(): Array<String> = Array(getNumSimplifiers()) { Z3_get_simplifier_name(context, it.toUInt())?.toKString() ?: "" }
     public actual fun getSimplifierDescription(name: String): String = Z3_simplifier_get_descr(context, name)?.toKString() ?: ""
-    public actual fun mkSimplifier(name: String): Simplifier = Simplifier(Z3_mk_simplifier(context, name)!!)
+    public actual fun mkSimplifier(name: String): Simplifier = Simplifier(Z3_mk_simplifier(context, name)!!, this)
     public actual fun getNumProbes(): Int = Z3_get_num_probes(context).toInt()
     public actual fun getProbeNames(): Array<String> = Array(getNumProbes()) { Z3_get_probe_name(context, it.toUInt())?.toKString() ?: "" }
     public actual fun getProbeDescription(name: String): String = Z3_probe_get_descr(context, name)?.toKString() ?: ""
-    public actual fun mkProbe(name: String): Probe = Probe(Z3_mk_probe(context, name)!!)
-    public actual fun constProbe(value: Double): Probe = Probe(Z3_probe_const(context, value)!!)
-    public actual fun lt(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_lt(context, p1.native, p2.native)!!)
-    public actual fun gt(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_gt(context, p1.native, p2.native)!!)
-    public actual fun le(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_le(context, p1.native, p2.native)!!)
-    public actual fun ge(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_ge(context, p1.native, p2.native)!!)
-    public actual fun eq(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_eq(context, p1.native, p2.native)!!)
-    public actual fun and(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_and(context, p1.native, p2.native)!!)
-    public actual fun or(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_or(context, p1.native, p2.native)!!)
-    public actual fun not(p: Probe): Probe = Probe(Z3_probe_not(context, p.native)!!)
+    public actual fun mkProbe(name: String): Probe = Probe(Z3_mk_probe(context, name)!!, this)
+    public actual fun constProbe(value: Double): Probe = Probe(Z3_probe_const(context, value)!!, this)
+    public actual fun lt(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_lt(context, p1.native, p2.native)!!, this)
+    public actual fun gt(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_gt(context, p1.native, p2.native)!!, this)
+    public actual fun le(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_le(context, p1.native, p2.native)!!, this)
+    public actual fun ge(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_ge(context, p1.native, p2.native)!!, this)
+    public actual fun eq(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_eq(context, p1.native, p2.native)!!, this)
+    public actual fun and(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_and(context, p1.native, p2.native)!!, this)
+    public actual fun or(p1: Probe, p2: Probe): Probe = Probe(Z3_probe_or(context, p1.native, p2.native)!!, this)
+    public actual fun not(p: Probe): Probe = Probe(Z3_probe_not(context, p.native)!!, this)
     public actual fun mkSolver(): Solver = Solver(Z3_mk_solver(context)!!, this)
     public actual fun mkSolver(logic: Symbol): Solver = Solver(Z3_mk_solver_for_logic(context, logic.native)!!, this)
     public actual fun mkSolver(logic: String): Solver = mkSolver(mkSymbol(logic))
     public actual fun mkSolver(t: Tactic): Solver = Solver(Z3_mk_solver_from_tactic(context, t.native)!!, this)
     public actual fun mkSolver(s: Solver, simplifier: Simplifier): Solver = Solver(Z3_solver_add_simplifier(context, s.native, simplifier.native)!!, this)
     public actual fun mkSimpleSolver(): Solver = Solver(Z3_mk_simple_solver(context)!!, this)
-    public actual fun mkFixedpoint(): Fixedpoint = Fixedpoint(Z3_mk_fixedpoint(context)!!)
+    public actual fun mkFixedpoint(): Fixedpoint = Fixedpoint(Z3_mk_fixedpoint(context)!!, this)
     public actual fun mkOptimize(): Optimize = Optimize(Z3_mk_optimize(context)!!, this)
 
     public actual fun mkFPRoundingModeSort(): FPRMSort = FPRMSort(Z3_mk_fpa_rounding_mode_sort(context)!!)
@@ -792,7 +792,7 @@ public actual class Context public actual constructor(config: Map<String, String
         FuncDecl(Z3_mk_partial_order(context, sort.native, index.toUInt())!!)
 
     public actual fun SimplifyHelp(): String = Z3_simplify_get_help(context)!!.toKString()
-    public actual fun getSimplifyParameterDescriptions(): ParamDescriptions = ParamDescriptions(Z3_simplify_get_param_descrs(context)!!)
+    public actual fun getSimplifyParameterDescriptions(): ParamDescriptions = ParamDescriptions(Z3_simplify_get_param_descrs(context)!!, this)
     public actual fun updateParamValue(key: String, value: String): Unit = Z3_update_param_value(context, key, value)
 
     public actual override fun close() {

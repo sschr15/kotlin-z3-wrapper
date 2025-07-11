@@ -36,7 +36,7 @@ private val exprTypes = setOf(
     Z3_VAR_AST,
 )
 
-public actual open class AST(internal val context: Context, private val native: Z3_ast) : Z3Object() {
+public actual open class AST(context: Context, private val native: Z3_ast) : Z3Object(context) {
     public actual fun isApp(): Boolean = Z3_get_ast_kind(context.native, native) == Z3_APP_AST
     public actual fun isVar(): Boolean = Z3_get_ast_kind(context.native, native) == Z3_VAR_AST
     public actual fun isQuantifier(): Boolean = Z3_get_ast_kind(context.native, native) == Z3_QUANTIFIER_AST
@@ -62,6 +62,12 @@ public actual open class AST(internal val context: Context, private val native: 
 public actual open class Expr<S : Sort>(context: Context, internal val native: Z3_ast) : AST(context, native) {
     private val app by lazy { Z3_to_app(context.native, native) }
     private fun nativeFunc() = Z3_get_app_decl(context.native, app)!!
+    
+    public override fun toString(): String = when {
+        isNumeral() -> Z3_get_numeral_string(context.native, native)!!.toKString()
+        //TODO other cases
+        else -> super.toString()
+    }
 
     public actual fun simplify(): Expr<S> = Expr(Z3_simplify(context.native, native)!!, context)
     public actual fun simplify(params: Params): Expr<S> = Expr(Z3_simplify_ex(context.native, native, params.native)!!, context)
